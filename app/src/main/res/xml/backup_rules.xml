@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Client data must not leave the device through Google backup; the Griha server is the backup. -->
+<!-- Client data must not leave the device through Google backup; the Home Inspection server is the backup. -->
 <full-backup-content>
     <exclude domain="root" path="." />
     <exclude domain="file" path="." />

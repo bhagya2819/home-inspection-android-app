@@ -391,7 +391,7 @@ func (s *Server) downloadReportDocx(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 	st, _ := f.Stat()
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": fmt.Sprintf("Griha-Report-%s-v%d.docx", d.number, d.version)}))
+	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": fmt.Sprintf("HomeInspection-Report-%s-v%d.docx", d.number, d.version)}))
 	w.Header().Set("Cache-Control", "private, no-store")
 	http.ServeContent(w, r, "", st.ModTime(), f)
 	u := userFrom(r)
@@ -867,7 +867,7 @@ func (b *docxBuilder) header() string {
 		`xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ` +
 		`xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">` +
 		para(0, 0, tab+fmt.Sprintf(`<w:pBdr><w:bottom w:val="single" w:sz="4" w:space="4" w:color="%s"/></w:pBdr>`, cLine),
-			logo, run("  Griha Home Inspection", runStyle{bold: true, size: 9.5, color: cDeep}), `<w:r><w:tab/></w:r>`,
+			logo, run("  Home Inspection", runStyle{bold: true, size: 9.5, color: cDeep}), `<w:r><w:tab/></w:r>`,
 			run(b.ref(), runStyle{size: 8.5, color: cMuted})) +
 		`</w:hdr>`
 }
@@ -887,7 +887,7 @@ func (b *docxBuilder) footer() string {
 	}
 	return xmlHeader + `<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
 		para(0, 0, tab+fmt.Sprintf(`<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="%s"/></w:pBdr>`, cLine),
-			run("Griha Home Inspection · "+b.ref(), st), `<w:r><w:tab/></w:r>`,
+			run("Home Inspection · "+b.ref(), st), `<w:r><w:tab/></w:r>`,
 			run("Page ", st), field("PAGE"), run(" of ", st), field("NUMPAGES")) +
 		`</w:ftr>`
 }
@@ -911,8 +911,8 @@ func (b *docxBuilder) coreProps() string {
 	return xmlHeader + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ` +
 		`xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ` +
 		`xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">` +
-		`<dc:title>` + esc("Griha inspection report "+b.d.number+" – Version "+fmt.Sprint(b.d.version)) + `</dc:title>` +
-		`<dc:creator>Griha Home Inspection</dc:creator></cp:coreProperties>`
+		`<dc:title>` + esc("Home Inspection inspection report "+b.d.number+" – Version "+fmt.Sprint(b.d.version)) + `</dc:title>` +
+		`<dc:creator>Home Inspection</dc:creator></cp:coreProperties>`
 }
 
 const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` + "\n"

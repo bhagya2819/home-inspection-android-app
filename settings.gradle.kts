@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Griha"
+rootProject.name = "Home Inspection"
 include(":app")

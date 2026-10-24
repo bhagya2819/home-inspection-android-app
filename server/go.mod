@@ -1,4 +1,4 @@
-module griha.in/server
+module home-inspection.in/server
 
 go 1.26.0
 

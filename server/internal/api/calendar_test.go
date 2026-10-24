@@ -254,7 +254,7 @@ func TestLeaveAndCalendar(t *testing.T) {
 		t.Fatal("web dashboard can't download the export")
 	}
 	resp, body := h.get("/v1/admin/calendar/export?month=2026-10", admin, nil)
-	if resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Content-Disposition"), "Griha-Attendance-2026-10.xlsx") {
+	if resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Content-Disposition"), "HomeInspection-Attendance-2026-10.xlsx") {
 		t.Fatalf("export: %d %s", resp.StatusCode, body)
 	}
 	zr, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))

@@ -1,6 +1,6 @@
-# Griha API v1
+# Home Inspection API v1
 
-Base URL `https://api.grihahomeinspection.in`. JSON over HTTPS; client-neutral (Android today, iOS later).
+Base URL `https://api.homeinspection.example`. JSON over HTTPS; client-neutral (Android today, iOS later).
 Errors: `{"error": {"code": "…", "message": "…"}}` — branch on `code`, show `message`.
 Auth: `Authorization: Bearer <token>` on everything except `/healthz` and `/v1/auth/login`.
 Any `401` means the session is gone (expired, revoked, account disabled): sign in again; keep local data.
@@ -99,7 +99,7 @@ Sent upstream: room names, property type, finding text, photo captions. Never cl
 - `GET /v1/admin/ai` (admin) → `{available, key_set, key_last4?, key_set_at?, key_set_by?, model, daily_limit, month_requests,
   month_tokens, users:[{name, requests}]}`. The key itself is never returned.
 - `PUT /v1/admin/ai/key {key}` (admin) → checked with DeepSeek `GET /models` first (`400 AI_KEY_REJECTED`), sealed with
-  AES-256-GCM under `GRIHA_SECRET_KEY` (env, 64 hex chars; `503 AI_UNAVAILABLE` if unset). Audit `AI_KEY_SET`.
+  AES-256-GCM under `HOME_INSPECTION_SECRET_KEY` (env, 64 hex chars; `503 AI_UNAVAILABLE` if unset). Audit `AI_KEY_SET`.
   `DELETE /v1/admin/ai/key` → audit `AI_KEY_REMOVED`.
 - `POST /v1/ai/finding {room, property_type, category, severity, title, site_note, observation, implication, recommendation,
   photo_captions[], categories[]}` → `{title, observation, implication, recommendation, severity?, severity_reason?, category?}`
@@ -182,7 +182,7 @@ never enforced.
 - `GET /v1/admin/calendar/team?month=` → `{month, today, users:[{user, days:[mark…], pending:[day…], totals}], holidays,
   comp_offs:[{user_id, display_name, day, kind: EARNED|GRANTED, check, worked_ms}]}`. Users: tracked, started by the month's end,
   not disabled before its start. Marks = status, but `COMP_OFF` for comp-off days and `HALF_LEAVE_<half_work>` when known.
-- `GET /v1/admin/calendar/export?month=` → `Griha-Attendance-YYYY-MM.xlsx` (web too): sheet Summary (one row per engineer:
+- `GET /v1/admin/calendar/export?month=` → `HomeInspection-Attendance-YYYY-MM.xlsx` (web too): sheet Summary (one row per engineer:
   working days, days and hours worked, missed check-ins/outs, leave by kind, comp-offs earned, comp-off balance today) and sheet
   Day by day (date, status, check-in/out in India time, hours, leave, holiday, comp-off, notes; future days left out). Audited.
 - `POST /v1/leave {id, user_id?, kind: CASUAL|SICK|COMP_OFF, start_day, end_day, half?: FIRST|SECOND, reason}` → PENDING.
@@ -205,16 +205,16 @@ never enforced.
 ## Web dashboard (`/web/`, same server)
 Plain HTML/JS embedded in the binary (`internal/api/web/`), strict CSP (no inline script or style), HSTS. `GET /` redirects to `/web/`.
 The static files stay reachable under the developer lock; every API call still gets the 423.
-- `POST /v1/auth/web-login {employee_code, password}` + header `X-Griha-Web: 1` → `{user}` and an HttpOnly, Secure,
-  SameSite=Strict cookie `__Host-griha_web`. Same rate gate, lockouts and password rules as the app; `sessions.web = true`, no device,
+- `POST /v1/auth/web-login {employee_code, password}` + header `X-Home-Inspection-Web: 1` → `{user}` and an HttpOnly, Secure,
+  SameSite=Strict cookie `__Host-home_inspection_web`. Same rate gate, lockouts and password rules as the app; `sessions.web = true`, no device,
   ends after 12 idle hours (90-day cap as for phones). A web cookie is never accepted as a bearer token and vice versa.
-  Non-GET requests with the cookie need `X-Griha-Web: 1` (a cross-site form can't send it). `POST /v1/auth/logout` clears it.
+  Non-GET requests with the cookie need `X-Home-Inspection-Web: 1` (a cross-site form can't send it). `POST /v1/auth/logout` clears it.
   Web sessions only reach the dashboard's routes (`webRoutes` in `web.go`); sync, uploads, attendance, tracking, face, AI → `403 NOT_ON_WEB`.
   Word photos over 50 MP are skipped (placeholder) instead of decoded.
 - Everyone: `GET /v1/reports?q=&before=` → `{inspections, next}`, 200 per page (`next` = the `before` of the following page,
   `""` after the last); each inspection has its latest report and `versions` (newest first) `{id, version, pdf:
   AVAILABLE|UPLOADING|ARCHIVED, docx, docx_reason?}`. `GET /v1/reports/{id}/pdf` works for any version (named
-  `Griha-Report-<number>-v<n>.pdf` for the web) and `GET /v1/reports/{id}/docx`: an editable Word copy following the PDF layout
+  `HomeInspection-Report-<number>-v<n>.pdf` for the web) and `GET /v1/reports/{id}/docx`: an editable Word copy following the PDF layout
   (report-size photos 1600 px q80 with EXIF rotation, like the phone), built from the version's **content snapshot** — so any
   version, matching its PDF. Versions without one (finalized before 0.9.0) only for the latest version of a FINALIZED inspection,
   from the live data (`409 NOT_LATEST`). `409 PHOTOS_UPLOADING` while photos are missing; archived photos show a placeholder.
@@ -236,7 +236,7 @@ The static files stay reachable under the developer lock; every API call still g
 - Sessions: 30 days sliding, and never older than 90 days.
 - Export links: valid 30 minutes after their last use (each request extends it).
 - AI: the phone removes the inspection's client name/phone/address; the server removes phone numbers and emails.
-- Accepted risks: blocking a device doesn't stop a person (disable the account); `griha-api` shares the
+- Accepted risks: blocking a device doesn't stop a person (disable the account); `home-inspection-api` shares the
   `bondverse_default` network with the other apps' containers, which can reach it directly and set `X-Real-IP` (other
   containers on the box are trusted); every inspector can read and edit every inspection (recorded decision); phone data
   is protected by Android's file encryption and the device lock, not by the app.
@@ -249,26 +249,26 @@ The static files stay reachable under the developer lock; every API call still g
   before authentication. Phones lock only when status 423 *and* code `APP_LOCKED` match; anything else changes nothing.
 - No HTTP endpoint changes the lock and the client's admins can't see it (history in `app_lock_history`, not `audit_events`).
   Locking deletes nothing: sessions, records and files stay; phones keep unsynced work queued until an unlock.
-- `docker exec griha-api /griha-api lock "Message shown on the phones"` · `... unlock` · `... lock-status`.
+- `docker exec home-inspection-api /home-inspection-api lock "Message shown on the phones"` · `... unlock` · `... lock-status`.
   The API re-reads the switch at most every 3 s.
 
 ## Operations
-- Lives in `/root/apps/griha` on the Hetzner box: `docker-compose.yml`, `.env` (DB password, `GRIHA_SECRET_KEY`), `data/objects`,
+- Lives in `/root/apps/home-inspection` on the Hetzner box: `docker-compose.yml`, `.env` (DB password, `HOME_INSPECTION_SECRET_KEY`), `data/objects`,
   `data/postgres`, `src/` (rsync of this folder). Caddy block appended to `/opt/bondverse/Caddyfile`.
-- Tests: `sh test.sh` (throwaway Postgres). Deploy: rsync `server/` → `src/`, `docker compose up -d --build griha-api`.
-- Bootstrap a user: `echo PASSWORD | docker exec -i griha-api /griha-api create-user CODE "Name" ADMIN`.
+- Tests: `sh test.sh` (throwaway Postgres). Deploy: rsync `server/` → `src/`, `docker compose up -d --build home-inspection-api`.
+- Bootstrap a user: `echo PASSWORD | docker exec -i home-inspection-api /home-inspection-api create-user CODE "Name" ADMIN`.
 
 ### Backups
-- Weekly, Sunday 02:30 IST: `/etc/cron.d/griha-backup` (copy in `deploy/griha-backup.cron`) runs `sh backup.sh`,
+- Weekly, Sunday 02:30 IST: `/etc/cron.d/home-inspection-backup` (copy in `deploy/home-inspection-backup.cron`) runs `sh backup.sh`,
   log `backups/backup.log`, last result `backups/last-backup.txt`. `backups/` is mode 700 (dumps hold password hashes).
-- `backup.sh`: `pg_dump -Fc` → `backups/db/griha-<UTC stamp>.dump`, checked with `pg_restore --list`, newest 8 kept.
+- `backup.sh`: `pg_dump -Fc` → `backups/db/home-inspection-<UTC stamp>.dump`, checked with `pg_restore --list`, newest 8 kept.
   Optional off-site copy: create `rclone/rclone.conf` (mode 600) with a remote named `offsite` — intended for a
   dedicated backup Google account, never a personal one (`scope = drive.file`). Objects go up with `--ignore-existing`
   (immutable, never deleted remotely); remote dumps older than 90 days are pruned. Without the file it is skipped.
 - `sh restore-test.sh [objects_dir]`: restores the newest dump into a throwaway Postgres (tmpfs, `--network none`) and
   checks every verified photo/report object against the restored SHA-256; exits 1 on any MISSING/MISMATCH.
   Tested 2026-10-20: 18/18 objects OK; a deliberately corrupted copy was reported as MISMATCH.
-- Real restore: `docker compose stop griha-api`, recreate the DB (`dropdb`/`createdb` in griha-postgres),
-  `docker exec -i griha-postgres pg_restore -U griha -d griha --no-owner < dump`, copy objects back into `data/objects`,
-  `docker compose start griha-api`.
+- Real restore: `docker compose stop home-inspection-api`, recreate the DB (`dropdb`/`createdb` in home-inspection-postgres),
+  `docker exec -i home-inspection-postgres pg_restore -U home-inspection -d home-inspection --no-owner < dump`, copy objects back into `data/objects`,
+  `docker compose start home-inspection-api`.
 - Long-term storage: admin export/archive (M5) — zips downloaded from the app and kept off the server.

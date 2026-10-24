@@ -46,7 +46,7 @@ func clockText(ms *int64) string {
 
 func hoursOf(ms int64) float64 { return float64(ms/60000) / 60 } // whole minutes, so 7h 59m isn't 7.99999
 
-// GET /v1/admin/calendar/export?month=YYYY-MM → Griha-Attendance-YYYY-MM.xlsx
+// GET /v1/admin/calendar/export?month=YYYY-MM → HomeInspection-Attendance-YYYY-MM.xlsx
 func (s *Server) attendanceExport(w http.ResponseWriter, r *http.Request) {
 	from, to, ok := parseMonth(r.URL.Query().Get("month"))
 	if !ok {
@@ -126,7 +126,7 @@ func (s *Server) attendanceExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": "Griha-Attendance-" + from.Format(monthLayout) + ".xlsx"}))
+	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": "HomeInspection-Attendance-" + from.Format(monthLayout) + ".xlsx"}))
 	w.Header().Set("Cache-Control", "private, no-store")
 	w.Header().Set("Content-Length", strconv.Itoa(len(xlsx)))
 	_, _ = w.Write(xlsx)

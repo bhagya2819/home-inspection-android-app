@@ -1,7 +1,7 @@
-# Griha — offline-first house inspection app (Android)
+# Home Inspection — offline-first house inspection app (Android)
 
-Client app for Griha Home Inspection. Spec: `House_Inspection_Android_App_PRD.md` (the source of truth).
-UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha-brand-guidelines.pdf`, `griha-icon.png`.
+Client app for Home Inspection. Spec: `House_Inspection_Android_App_PRD.md` (the source of truth).
+UI reference: `Home_Inspection_Clickable_Prototype_v2.html`. Brand: `home-inspection-brand-guidelines.pdf`, `home-inspection-icon.png`.
 
 ## Status
 - **M1 done** — skeleton, Room schema (PRD §7, minus users/devices), crash-safe photo capture, storage limits.
@@ -13,17 +13,17 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
 - **M4 done** — login (online first, 7-day offline window, offline verifier), sync engine (outbox push with
   revisions/conflicts, verified photo + PDF upload, cursor pull, downloads of other phones' photos/PDFs),
   JobScheduler retries, Backup & account screen. Go server in `server/` (see `server/API.md`), live at
-  `https://api.grihahomeinspection.in`. Verified on the POCO F4: 12/12 photos byte-identical on the server.
+  `https://api.homeinspection.example`. Verified on the POCO F4: 12/12 photos byte-identical on the server.
 - **M5 mostly done (v0.5.0, DB v3, server migration 002 live)** — in-app admin (`feature/admin/`: employees, inspections'
   backup status, phones + their failed sync items, audit log, retention policy, server storage). Admin export/archive
   instead of paid storage: month-sized deterministic Store zips (manifest.csv + data.json), phone downloads via
-  DownloadManager to Downloads/Griha, re-hashes every entry → VERIFIED → "Remove from server" deletes files of finalized
+  DownloadManager to Downloads/Home Inspection, re-hashes every entry → VERIFIED → "Remove from server" deletes files of finalized
   inspections ≥ 60 days old (records stay, GET → 410). Phone retention (`core/retention/`): opt-in switch, predicate =
   finalized + synced + server checksum + in a VERIFIED export + 30 days after later of finalization/verification, live
   `/v1/photos/check`, re-checked inside the deleting transaction, audited and uploaded via `/v1/devices/report`.
   Verified on the POCO F4: v2→v3 upgrade with real data, 8 instrumented tests (migration + real deletions).
-- **Release:** key created by the user (`~/.griha/`, PKCS12, one password; never read it). `tools/release.sh` →
-  `dist/Griha-<ver>.apk`, refuses debug-signed builds. Docs for inspectors: `docs/install-guide.md`, notes in
+- **Release:** key created by the user (`~/.home-inspection/`, PKCS12, one password; never read it). `tools/release.sh` →
+  `dist/HomeInspection-<ver>.apk`, refuses debug-signed builds. Docs for inspectors: `docs/install-guide.md`, notes in
   `docs/release-notes.md`. Bump versionCode/versionName per release.
 - **0.5.1 released (2026-10-20)**: the phone now runs the release-signed build (debug app uninstalled by the user, so
   `run-as` / `tools/verify-device.sh` no longer work on it; check via the server: devices.sync_report, photos.verified_at).
@@ -31,7 +31,7 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
   a debug build, which can't be installed over the release one — ask the user first.
 - **0.7.0 built (2026-10-21, code 6, DB v4, server migration 003 live)**: AI writing help (see Decisions), report summary,
   camera thumbnails open the viewer, report pages zoom in place, site notes never printed; includes the ui-redesign
-  branch (0.6.0/0.6.1). Server deployed with `GRIHA_SECRET_KEY` in `.env`; AI stays off until the admin adds the
+  branch (0.6.0/0.6.1). Server deployed with `HOME_INSPECTION_SECRET_KEY` in `.env`; AI stays off until the admin adds the
   DeepSeek key. Not yet verified on the phone; MigrationTest 3→4 not yet run there (needs a debug build).
 - **0.7.1 (code 7)**: security audit fixes (`review/security-audit-0.7.0.md`): login rate gate, soft account lock for
   known phones, server-enforced password change, 10-char passwords, 90-day session cap, 30-min sliding export links,
@@ -51,7 +51,7 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
   manual start, check-in start / check-out stop, turn off with reason, Location off/on (events reach the server in
   ~1 s), app update → interruption → "Tap to resume" → RESUME, reopen → RESTORE, sign-out uploads STOP before the
   session ends, admin Team list/map + day view. MIUI without Autostart drops BOOT/MY_PACKAGE_REPLACED broadcasts:
-  safety net in `GrihaApp` (background process start + should-share + no service → INTERRUPTED + notification).
+  safety net in `HomeInspectionApp` (background process start + should-share + no service → INTERRUPTED + notification).
   WebView must be MATCH_PARENT (WRAP_CONTENT collapsed the map to 0 px). Not yet verified on the phone: live mode
   (15 s / 30 s, covered by server tests only), battery drain unplugged. Not released (no version bump).
   **0.8.0 (code 9, 2026-10-21)** = features 1 + 2, merged into main for the pilot (user); SOS ships later as 0.9.0.
@@ -77,7 +77,7 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
   `src-calendar-fixes`), govulncheck clean; app builds, unit tests pass. Not yet tapped through on the phone.
 - **0.9.0 (code 11, 2026-10-22)** = admin features + room order/common photos, all branches merged into main (single
   line of code). Server at `8ee829e` (web polish) deployed 2026-10-22, previous in `src.prev` +
-  `backups/predeploy-0.9.0-*.dump`; 36+ server tests pass. `dist/Griha-0.9.0.apk` built. Debug 0.9.0 on the POCO (DB 6→8 upgrade on real data, integrity ok); not yet tapped through.
+  `backups/predeploy-0.9.0-*.dump`; 36+ server tests pass. `dist/HomeInspection-0.9.0.apk` built. Debug 0.9.0 on the POCO (DB 6→8 upgrade on real data, integrity ok); not yet tapped through.
   Web: monthly attendance Excel (`attendance_export.go`, own minimal .xlsx writer: Summary + Day by day sheets, built from
   `buildDays`) deployed 2026-10-22; Backup page explains that exports only hold files not in an earlier checked export.
   Next: feature 3 (SOS) → 0.10.0.
@@ -90,19 +90,19 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
 - One login for online+offline; offline valid **7 days** since last server check (stored PBKDF2 hash, Keystore).
   After an offline sign-in the password is kept in memory only, to finish the online sign-in automatically.
 - No OkHttp/WorkManager: `HttpURLConnection` + platform `JobScheduler` (M4 added ~66 KB to the release APK).
-- Server: Go 1.26 + pgx only (run `govulncheck` on the server with server changes), own Postgres container, `/root/apps/griha` on SSH host `bondverse`. Touch nothing else
-  on that box; the only shared change is the Griha block in `/opt/bondverse/Caddyfile` (`server/deploy/`).
+- Server: Go 1.26 + pgx only (run `govulncheck` on the server with server changes), own Postgres container, `/root/apps/home-inspection` on SSH host `bondverse`. Touch nothing else
+  on that box; the only shared change is the Home Inspection block in `/opt/bondverse/Caddyfile` (`server/deploy/`).
   Build/test Go **on the server** (`sh test.sh`), never on the Mac (low RAM). API is client-neutral for a future iOS app.
 - Everyone sees all inspections (per-user restriction switch later, server-side).
 - Admin features live inside the app.
 - **AI writing help (user decision 2026-10-21, reverses the PRD §2.2 non-goal):** DeepSeek `deepseek-flash`, one key for
-  everyone, entered once in Admin → AI assistant, stored AES-GCM-sealed on the server (`GRIHA_SECRET_KEY` in the server's
+  everyone, entered once in Admin → AI assistant, stored AES-GCM-sealed on the server (`HOME_INSPECTION_SECRET_KEY` in the server's
   `.env`), write-only, never on phones. Phones → `/v1/ai/*` → DeepSeek; prompts live in `server/internal/api/ai.go`.
   Every suggestion is shown beside its field with ✓/✗ and applied only on ✓ (the AI can be wrong). Features: finding
   rewrite (+ severity/category), report summary (`inspections.summary`, DB v4), pre-finalize check. Online-only. Never send
   client name/phone/address. Photo-aware suggestions were considered and deferred.
 - **Developer lock (user decision 2026-10-21):** the developer's leverage for unpaid licence fees, not an admin feature.
-  One global switch, set only over SSH (`docker exec griha-api /griha-api lock "msg"` / `unlock` / `lock-status`); never
+  One global switch, set only over SSH (`docker exec home-inspection-api /home-inspection-api lock "msg"` / `unlock` / `lock-status`); never
   exposed over HTTP or in the app. No warning banner (user's choice): full-screen "App locked" over everything, incl. login.
   Phone locks ONLY on 423 + `APP_LOCKED`, unlocks ONLY on `/v1/app/status` 200 `locked:false`; state persists offline.
   Deletes nothing, signs nobody out; a lock must never mark outbox items failed. Lock only when the user asks.
@@ -153,7 +153,7 @@ UI reference: `Griha_Home_Inspection_Clickable_Prototype_v2.html`. Brand: `griha
 ## Invariants — do not break
 - A photo is "saved" only after: temp file fsync → SHA-256 → atomic rename → ONE Room transaction inserting
   the photo row + its `sync_outbox` UPLOAD_ORIGINAL entry. See `PhotoStore` / `PhotoRepository.commitCapture`.
-- Saves that must outlive a screen run in `GrihaApp.appScope` (photo commit, `AutoSaver`), never viewModelScope.
+- Saves that must outlive a screen run in `HomeInspectionApp.appScope` (photo commit, `AutoSaver`), never viewModelScope.
 - Every write enqueues its outbox entry **in the same transaction** (`SyncOutboxDao.enqueue`).
 - Deletes are tombstones (`deleted_at`); never hard-delete records or original files outside PRD §12 cleanup.
 - Originals are immutable; report images are separate derived files.
@@ -178,21 +178,21 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
   then verify behind the scenes. Screenshots: `adb exec-out screencap -p` (screen must be unlocked).
 - **Never start the emulator** (user, 2026-10-20: not enough RAM). Use the phone only (`ANDROID_SERIAL=81c5b68e`).
   Stop Gradle (`./gradlew --stop`) when done — the user asked to keep Java off when idle.
-- Debug builds are `com.griha.inspection.debug` ("Griha (debug)", user-approved 2026-10-21): installed next to the
+- Debug builds are `com.homeinspection.app.debug` ("Home Inspection (debug)", user-approved 2026-10-21): installed next to the
   release app with their own data, signed in as employee `TEST` (password in git-ignored `test-credentials.properties`).
-  `run-as com.griha.inspection.debug` works. Face/attendance logs: `adb logcat -s GrihaFace`.
+  `run-as com.homeinspection.app.debug` works. Face/attendance logs: `adb logcat -s HomeInspectionFace`.
 - Instrumented tests on the phone: never `:app:connectedDebugAndroidTest` (it uninstalls the app = data loss).
   Instead `assembleDebugAndroidTest`, `adb install -r` the test APK (Xiaomi shows an "Install via USB" prompt the user
-  must tap), `am instrument -w -e class <tests> com.griha.inspection.debug.test/androidx.test.runner.AndroidJUnitRunner`,
-  then `adb uninstall com.griha.inspection.debug.test` and delete test leftovers in the debug app's data
+  must tap), `am instrument -w -e class <tests> com.homeinspection.app.debug.test/androidx.test.runner.AndroidJUnitRunner`,
+  then `adb uninstall com.homeinspection.app.debug.test` and delete test leftovers in the debug app's data
   (`databases/migration-test*`, `shared_prefs/retention-test-*`). Use bash for `tools/verify-device.sh`.
 - `tools/verify-device.sh` — read-only DB pull + per-photo checksum/size/outbox check.
 - `tools/kill-on-shutter.sh` — force-kills the app N seconds after each shutter press (crash tests).
 - Debug builds only: a number in the app's private `files/debug_free_bytes` fakes free space
-  (`adb shell "run-as com.griha.inspection sh -c 'echo 400000000 > files/debug_free_bytes'"`); delete after.
+  (`adb shell "run-as com.homeinspection.app sh -c 'echo 400000000 > files/debug_free_bytes'"`); delete after.
 - CameraX: unbind only your own use cases (`provider.unbind(...)`), never `unbindAll()` — the provider is app-wide and
   a closing screen's cleanup once blacked out the next camera screen during the navigation transition.
-- **Never modify anything on the phone outside the Griha app's own data.** The user asked for this explicitly.
+- **Never modify anything on the phone outside the Home Inspection app's own data.** The user asked for this explicitly.
 - Never `adb uninstall` / clear app data — the user's test inspections live there.
 
 ## Working with this user

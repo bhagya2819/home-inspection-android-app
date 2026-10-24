@@ -1,4 +1,4 @@
-// Package api is the Griha central hub (PRD §6.3): accounts, record sync, verified photo and
+// Package api is the Home Inspection central hub (PRD §6.3): accounts, record sync, verified photo and
 // report backup. It never processes images or builds PDFs; clients do that on the device.
 package api
 
@@ -25,7 +25,7 @@ type Config struct {
 	DataDir        string // photo and report objects
 	MaxUploadBytes int64
 	SessionTTL     time.Duration
-	AISecret       []byte // 32 bytes (GRIHA_SECRET_KEY); seals the DeepSeek key. Unset = AI off.
+	AISecret       []byte // 32 bytes (HOME_INSPECTION_SECRET_KEY); seals the DeepSeek key. Unset = AI off.
 	DeepSeekURL    string // default https://api.deepseek.com
 	AIModel        string // default deepseek-flash
 	LoginPerMinute int    // sign-in attempts per IP per minute (default 10)

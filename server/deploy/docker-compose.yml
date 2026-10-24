@@ -1,39 +1,39 @@
-# Griha API on the shared Hetzner box. Lives in /root/apps/griha; touches nothing else.
-# Caddy (bondverse project) reaches griha-api over the external bondverse_default network.
-name: griha
+# Home Inspection API on the shared Hetzner box. Lives in /root/apps/home-inspection; touches nothing else.
+# Caddy (bondverse project) reaches home-inspection-api over the external bondverse_default network.
+name: home-inspection
 services:
-  griha-api:
+  home-inspection-api:
     build: ./src
-    image: griha-api:latest
-    container_name: griha-api
+    image: home-inspection-api:latest
+    container_name: home-inspection-api
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://griha:${POSTGRES_PASSWORD}@griha-postgres:5432/griha?sslmode=disable
+      DATABASE_URL: postgres://home-inspection:${POSTGRES_PASSWORD}@home-inspection-postgres:5432/home-inspection?sslmode=disable
       DATA_DIR: /data
-      GRIHA_SECRET_KEY: ${GRIHA_SECRET_KEY:-}
+      HOME_INSPECTION_SECRET_KEY: ${HOME_INSPECTION_SECRET_KEY:-}
     volumes:
       - ./data/objects:/data
     networks: [default, bondverse_default]
     depends_on:
-      griha-postgres:
+      home-inspection-postgres:
         condition: service_healthy
     mem_limit: 256m
     logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
 
-  griha-postgres:
+  home-inspection-postgres:
     image: postgres:17-alpine
-    container_name: griha-postgres
+    container_name: home-inspection-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: griha
+      POSTGRES_USER: home-inspection
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: griha
+      POSTGRES_DB: home-inspection
     # Sized for a 4 GB box shared with other apps.
     command: postgres -c shared_buffers=64MB -c max_connections=30 -c effective_cache_size=256MB
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U griha -d griha"]
+      test: ["CMD-SHELL", "pg_isready -U home-inspection -d home-inspection"]
       interval: 5s
       timeout: 3s
       retries: 20

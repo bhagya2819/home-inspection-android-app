@@ -17,7 +17,7 @@ import (
 	"testing"
 )
 
-// webDo sends a request as the browser would: the session cookie, plus X-Griha-Web unless noHeader.
+// webDo sends a request as the browser would: the session cookie, plus X-Home-Inspection-Web unless noHeader.
 func (h *harness) webDo(method, path, cookie string, body any, noHeader bool) (*http.Response, []byte) {
 	h.t.Helper()
 	var rd io.Reader
@@ -30,7 +30,7 @@ func (h *harness) webDo(method, path, cookie string, body any, noHeader bool) (*
 		req.AddCookie(&http.Cookie{Name: webCookie, Value: cookie})
 	}
 	if !noHeader {
-		req.Header.Set("X-Griha-Web", "1")
+		req.Header.Set("X-Home-Inspection-Web", "1")
 	}
 	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	resp, err := client.Do(req)
@@ -207,7 +207,7 @@ func TestReportsListAndDocx(t *testing.T) {
 		t.Fatalf("number %s, want %s", list.Inspections[0].Number, want)
 	}
 	resp, body = h.webDo("GET", "/v1/reports/"+report+"/pdf", cookie, nil, true)
-	if resp.StatusCode != 200 || !bytes.Equal(body, pdf) || !strings.Contains(resp.Header.Get("Content-Disposition"), "Griha-Report-GRH-261020-") {
+	if resp.StatusCode != 200 || !bytes.Equal(body, pdf) || !strings.Contains(resp.Header.Get("Content-Disposition"), "HomeInspection-Report-GRH-261020-") {
 		t.Fatalf("pdf: %d %q", resp.StatusCode, resp.Header.Get("Content-Disposition"))
 	}
 

@@ -4,10 +4,10 @@
 # UPLOAD_ORIGINAL outbox entry) or server-verified (backup_checksum equals its SHA-256, no entry left).
 # Read-only: copies the DB to a temp dir; touches nothing on the phone.
 # Usage: tools/verify-device.sh   (needs adb + sqlite3; debug build for run-as)
-A=${ADB:-~/Library/Android/sdk/platform-tools/adb}; P=com.griha.inspection
-S=${TMPDIR:-/tmp}/griha-verify && rm -rf "$S" && mkdir -p "$S"
-for f in griha.db griha.db-wal griha.db-shm; do $A exec-out run-as $P cat databases/$f > "$S/$f" 2>/dev/null; done
-Q="sqlite3 -readonly $S/griha.db"
+A=${ADB:-~/Library/Android/sdk/platform-tools/adb}; P=com.homeinspection.app
+S=${TMPDIR:-/tmp}/home-inspection-verify && rm -rf "$S" && mkdir -p "$S"
+for f in home-inspection.db home-inspection.db-wal home-inspection.db-shm; do $A exec-out run-as $P cat databases/$f > "$S/$f" 2>/dev/null; done
+Q="sqlite3 -readonly $S/home-inspection.db"
 echo "== counts"; $Q "select 'inspections',count(*) from inspections union all select 'rooms',count(*) from rooms union all select 'findings',count(*) from findings union all select 'photos',count(*) from photos union all select 'outbox',count(*) from sync_outbox union all select 'audit',count(*) from audit_events;"
 echo "== photos (file check)"; ok=0; bad=0
 while IFS='|' read -r id path sha size w h; do

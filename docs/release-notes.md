@@ -1,4 +1,4 @@
-# Griha release notes
+# Home Inspection release notes
 
 Newest first. Send the relevant section with each APK.
 
@@ -12,7 +12,7 @@ Newest first. Send the relevant section with each APK.
   room heading in the report and never count as an issue.
 - Each finalized report is also kept on the server as an editable **Word** copy (web dashboard).
 - Admins: Profile → Admin → attendance calendar, leave approvals, holidays, and per-employee attendance settings.
-  The web dashboard (`https://api.grihahomeinspection.in/web/`, same login) has reports (PDF/Word, any version),
+  The web dashboard (`https://api.homeinspection.example/web/`, same login) has reports (PDF/Word, any version),
   calendar, leave, attendance by day, employees, phones, backups/exports and the audit log.
 - Install it over 0.8.x with **Update**. Never uninstall first.
 
@@ -32,19 +32,19 @@ Newest first. Send the relevant section with each APK.
 - **Location sharing:** checking in shares your location with your admin, checking out stops it. You can also switch it
   on yourself from the card on Home. To turn it off during work, pick a reason (low battery, break, other); your admin
   sees that you turned it off and why. It stays off until you turn it on or check out.
-- The first time, Griha shows what is shared and for how long (90 days). Allow **notifications**: while sharing, a
+- The first time, Home Inspection shows what is shared and for how long (90 days). Allow **notifications**: while sharing, a
   notification shows it and has a **Turn off** button.
 - **Xiaomi / POCO / Redmi:** on the location card (or Profile → Location sharing on this phone), follow the 1-minute
   battery guide: allow background running, **Autostart on**, battery saver **No restrictions**. Without it the phone
   may stop sharing in the background.
-- If the phone restarts or Griha is updated while sharing, you get **"Tap to resume"**; opening Griha resumes it.
+- If the phone restarts or Home Inspection is updated while sharing, you get **"Tap to resume"**; opening Home Inspection resumes it.
 - Admins: Profile → Admin → **Team locations** (alerts, list or map, each engineer's day with route and stops),
   **Attendance**, **Face set-ups** (approve faces). Alerts show when you open the app; there are no push notifications yet.
 - Install it over the version you have with **Update**. Never uninstall first.
 
 ## 0.7.2: reliability
 - Includes all 0.7.1 security fixes below.
-- The app checks in with the Griha server each time it opens.
+- The app checks in with the Home Inspection server each time it opens.
 - Install it over 0.7.0 or 0.7.1 with **Update**. Never uninstall first.
 
 ## 0.7.1: security fixes

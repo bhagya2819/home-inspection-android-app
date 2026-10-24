@@ -1,5 +1,5 @@
 -- Developer lock: one switch that makes every API request answer 423 APP_LOCKED, and phones show a
--- full-screen "contact your developer" notice. Set only with `griha-api lock` / `unlock` on the server
+-- full-screen "contact your developer" notice. Set only with `home-inspection-api lock` / `unlock` on the server
 -- (no HTTP endpoint changes it). Nothing is deleted while locked. Additive only.
 
 CREATE TABLE app_lock (

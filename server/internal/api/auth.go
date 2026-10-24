@@ -271,7 +271,7 @@ func (s *Server) auth(next http.HandlerFunc) http.Handler {
 				return
 			}
 			if !webRequestAllowed(r) {
-				writeError(w, http.StatusForbidden, "FORBIDDEN", "missing X-Griha-Web header")
+				writeError(w, http.StatusForbidden, "FORBIDDEN", "missing X-Home-Inspection-Web header")
 				return
 			}
 			if !webRouteAllowed(r) {

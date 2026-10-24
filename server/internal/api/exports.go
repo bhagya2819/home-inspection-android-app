@@ -64,7 +64,7 @@ func scanExport(row pgx.Row) (exportInfo, error) {
 	err := row.Scan(&e.ID, &e.Label, &e.Status, &e.CreatedAt, &e.EntryCount, &e.ObjectsBytes, &e.ZipBytes, &e.ManifestSHA256,
 		&e.VerifiedAt, &e.ArchivedAt, &archived)
 	e.ArchivedObjects = int(archived)
-	e.FileName = fmt.Sprintf("griha-export-%s-%d.zip", strings.ReplaceAll(e.Label, " ", "-"), e.ID)
+	e.FileName = fmt.Sprintf("home-inspection-export-%s-%d.zip", strings.ReplaceAll(e.Label, " ", "-"), e.ID)
 	return e, err
 }
 
@@ -426,7 +426,7 @@ func (s *Server) exportData(ctx context.Context, tx pgx.Tx, id int64, label stri
 		return nil, err
 	}
 	return json.MarshalIndent(map[string]any{
-		"format":      "griha-export/1",
+		"format":      "home-inspection-export/1",
 		"export":      map[string]any{"id": id, "label": label, "created_at": created.Format(time.RFC3339)},
 		"notes":       "Timestamps are UTC epoch milliseconds. Photo files are photos/<inspection_id>/<photo_id>.jpg; report PDFs are reports/<inspection_id>/<report_id>.pdf. manifest.csv lists the SHA-256 of every file.",
 		"users":       users,

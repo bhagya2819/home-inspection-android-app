@@ -23,7 +23,7 @@ import (
 // Sign-in uses the same employee code, password, rate gate and lockouts as the app. The session is
 // an HttpOnly, Secure, SameSite=Strict cookie (JS can't read it; other sites can't send it), kept in
 // the same sessions table with web = true. Requests that change something must also carry
-// X-Griha-Web: 1, which a cross-site form can't add. Web sessions end after 12 idle hours.
+// X-Home-Inspection-Web: 1, which a cross-site form can't add. Web sessions end after 12 idle hours.
 
 // hsts tells browsers to use HTTPS only for this host for a year (Caddy serves HTTPS only anyway).
 const hsts = "max-age=31536000"
@@ -33,7 +33,7 @@ var webFS embed.FS
 
 const (
 	// __Host-: the browser only accepts it Secure, for this exact host, on Path=/ (no subdomain can set it).
-	webCookie     = "__Host-griha_web"
+	webCookie     = "__Host-home_inspection_web"
 	webSessionTTL = 12 * time.Hour
 )
 
@@ -46,7 +46,7 @@ func webToken(r *http.Request) (string, bool) {
 }
 
 func webRequestAllowed(r *http.Request) bool {
-	return r.Method == http.MethodGet || r.Method == http.MethodHead || r.Header.Get("X-Griha-Web") == "1"
+	return r.Method == http.MethodGet || r.Method == http.MethodHead || r.Header.Get("X-Home-Inspection-Web") == "1"
 }
 
 // webRoutes are the only API routes a web session may use: what the dashboard needs. Phone-only
@@ -95,8 +95,8 @@ func clearWebCookie(w http.ResponseWriter) {
 
 // POST /v1/auth/web-login {employee_code, password} → sets the cookie, returns {user}.
 func (s *Server) webLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("X-Griha-Web") != "1" {
-		writeError(w, http.StatusForbidden, "FORBIDDEN", "missing X-Griha-Web header")
+	if r.Header.Get("X-Home-Inspection-Web") != "1" {
+		writeError(w, http.StatusForbidden, "FORBIDDEN", "missing X-Home-Inspection-Web header")
 		return
 	}
 	var req struct {
@@ -313,14 +313,14 @@ func safeIndex(parts []string, i int) string {
 	return ""
 }
 
-// reportFileName names a report download like the phone does: Griha-Report-<number>-v<version>.
+// reportFileName names a report download like the phone does: HomeInspection-Report-<number>-v<version>.
 func (s *Server) reportFileName(r *http.Request, reportID, ext string) string {
 	var date, inspection string
 	var version int64
 	err := s.db.QueryRow(r.Context(), `SELECT i.inspection_date, i.id::text, r.version FROM reports r JOIN inspections i ON i.id = r.inspection_id WHERE r.id = $1`,
 		reportID).Scan(&date, &inspection, &version)
 	if errors.Is(err, pgx.ErrNoRows) || err != nil {
-		return "Griha-Report." + ext
+		return "HomeInspection-Report." + ext
 	}
-	return fmt.Sprintf("Griha-Report-%s-v%d.%s", reportNumber(date, inspection), version, ext)
+	return fmt.Sprintf("HomeInspection-Report-%s-v%d.%s", reportNumber(date, inspection), version, ext)
 }

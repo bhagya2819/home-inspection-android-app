@@ -15,7 +15,7 @@ import (
 // Developer lock (migration 004). While locked, every request except /healthz is answered with
 // 423 {"error": {"code": "APP_LOCKED", "message": ...}}, before authentication, so no client
 // version can sign in, sync, upload or download. Phones show a full-screen notice; nothing is
-// deleted on the server or on phones. Changed only by `griha-api lock|unlock` on the server.
+// deleted on the server or on phones. Changed only by `home-inspection-api lock|unlock` on the server.
 
 // LockedStatus and LockedCode are the exact signal phones look for. Both must match: a 423 from
 // anything else (a proxy, a WebDAV-style error) never locks a phone.
@@ -107,7 +107,7 @@ func SetAppLock(ctx context.Context, db *pgxpool.Pool, locked bool, message stri
 	})
 }
 
-// AppLockStatus reports the stored state, for `griha-api lock-status`.
+// AppLockStatus reports the stored state, for `home-inspection-api lock-status`.
 func AppLockStatus(ctx context.Context, db *pgxpool.Pool) (locked bool, message string, changedAt time.Time, err error) {
 	err = db.QueryRow(ctx, `SELECT locked, message, changed_at FROM app_lock WHERE id`).Scan(&locked, &message, &changedAt)
 	return

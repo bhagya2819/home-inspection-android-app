@@ -245,7 +245,7 @@ test before changing any of them. It runs on the server with the rest (`sh test.
   then type the old password. This is not new, but the web makes it more likely. Mention it in the web's
   "password changed" message.
 - **L7. Missing hardening headers.** There is no HSTS header from the app (check that Caddy sends one), and the
-  cookie could use the `__Host-` prefix (`__Host-griha_web`, which already has Path=/ and Secure and no
+  cookie could use the `__Host-` prefix (`__Host-home_inspection_web`, which already has Path=/ and Secure and no
   Domain). Both are cheap.
 - **L8. Small Android leave items.**
   - `LeaveRepository.request` rethrows auth and password errors after the row is saved, so the UI shows an
@@ -332,11 +332,11 @@ test before changing any of them. It runs on the server with the rest (`sh test.
 | L4 | Own leave needs another active admin (`403 SELF_DECISION`), else audited "self-decided". |
 | L5 | Holiday PUT/DELETE return `affects`, shown to the admin; dates limited to 2020–2100. |
 | L6 | Web says the phone will ask to sign in again after a password change. |
-| L7 | `__Host-griha_web` cookie (web users sign in once more after the deploy), HSTS on the dashboard. |
+| L7 | `__Host-home_inspection_web` cookie (web users sign in once more after the deploy), HSTS on the dashboard. |
 | L8 | Delivered leave rows pruned after 30 days. (`request()` already reported auth errors as "queued": `ApiException` is an `IOException`.) |
 | L9 | Phone calendar uses India time for "today", months and clock times. |
 | L10 | CLAUDE.md wording aligned. |
 
-Verified: server `go vet` + all tests pass on the server (scratch copy `/root/apps/griha/src-calendar-fixes`, not `src/`),
+Verified: server `go vet` + all tests pass on the server (scratch copy `/root/apps/home-inspection/src-calendar-fixes`, not `src/`),
 gofmt clean, govulncheck clean; app `compileDebugKotlin` and `testDebugUnitTest` pass. Not yet: deploy (migration 009),
 the phone (debug build), a real Word open of a snapshot-based .docx.

@@ -1,7 +1,7 @@
 -- AI writing help (finding suggestions, report summary, pre-finalize check) via DeepSeek.
 -- Additive only: no existing column changes meaning and no row is removed.
 
--- The one DeepSeek API key, sealed with AES-256-GCM under GRIHA_SECRET_KEY (server env, never in the
+-- The one DeepSeek API key, sealed with AES-256-GCM under HOME_INSPECTION_SECRET_KEY (server env, never in the
 -- database). Write-only over the API: admins only ever see its last four characters.
 CREATE TABLE ai_key (
     id         boolean PRIMARY KEY DEFAULT true CHECK (id),

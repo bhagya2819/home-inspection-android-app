@@ -51,7 +51,7 @@ func aiSeverityLabel(value string) string {
 
 // ---- The key (admin only, write-only) -------------------------------------------------------
 
-const aiKeyAAD = "griha-ai-key-v1"
+const aiKeyAAD = "home-inspection-ai-key-v1"
 
 func (s *Server) sealAIKey(key string) (nonce, ciphertext []byte, err error) {
 	gcm, err := s.aiCipher()
@@ -77,7 +77,7 @@ func (s *Server) aiCipher() (cipher.AEAD, error) {
 }
 
 var (
-	errAIUnavailable = errors.New("GRIHA_SECRET_KEY is not set on the server")
+	errAIUnavailable = errors.New("HOME_INSPECTION_SECRET_KEY is not set on the server")
 	errAINoKey       = errors.New("no AI key")
 )
 
@@ -97,7 +97,7 @@ func (s *Server) aiKey(ctx context.Context) (string, error) {
 	}
 	plain, err := gcm.Open(nil, nonce, ciphertext, []byte(aiKeyAAD))
 	if err != nil {
-		return "", fmt.Errorf("AI key cannot be decrypted (GRIHA_SECRET_KEY changed?): %w", err)
+		return "", fmt.Errorf("AI key cannot be decrypted (HOME_INSPECTION_SECRET_KEY changed?): %w", err)
 	}
 	return string(plain), nil
 }
@@ -182,7 +182,7 @@ func (s *Server) setAIKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(s.cfg.AISecret) != 32 {
-		writeError(w, http.StatusServiceUnavailable, "AI_UNAVAILABLE", "the server has no GRIHA_SECRET_KEY, so it cannot store the key safely")
+		writeError(w, http.StatusServiceUnavailable, "AI_UNAVAILABLE", "the server has no HOME_INSPECTION_SECRET_KEY, so it cannot store the key safely")
 		return
 	}
 	// Check the key with DeepSeek before storing it, so a typo is caught now rather than on site.
@@ -413,7 +413,7 @@ func (s *Server) writeAIError(w http.ResponseWriter, where string, err error) {
 // ---- Shared instructions ------------------------------------------------------------------
 
 // The report's PDF prints Latin-1 only, and clients read it: plain English, plain punctuation.
-const aiHouseStyle = `You write for Griha Home Inspection, a residential property inspection company in India (Andhra Pradesh and Telangana). Reports go to home buyers and owners who are not engineers.
+const aiHouseStyle = `You write for Home Inspection, a residential property inspection company in India (Andhra Pradesh and Telangana). Reports go to home buyers and owners who are not engineers.
 
 Rules for everything you write:
 - Clear, professional, client-friendly English. Short sentences. No jargon without a plain explanation.

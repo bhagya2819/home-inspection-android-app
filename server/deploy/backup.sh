@@ -1,6 +1,6 @@
 #!/bin/sh
-# Weekly Griha backup. Usage (in /root/apps/griha): sh backup.sh
-#  1. pg_dump of the griha DB -> backups/db/griha-YYYYMMDD-HHMM.dump (checked with pg_restore --list, keeps 8).
+# Weekly Home Inspection backup. Usage (in /root/apps/home-inspection): sh backup.sh
+#  1. pg_dump of the home-inspection DB -> backups/db/home-inspection-YYYYMMDD-HHMM.dump (checked with pg_restore --list, keeps 8).
 #  2. Optional off-site copy: only if rclone/rclone.conf exists with a remote named "offsite"
 #     (e.g. a dedicated backup Google account). Objects are immutable: copied with --ignore-existing, never deleted.
 # Writes backups/last-backup.txt on success. Touches nothing outside this folder.
@@ -14,20 +14,20 @@ exec 9>backups/.lock
 flock -n 9 || { echo "backup already running"; exit 1; }
 
 stamp=$(date -u +%Y%m%d-%H%M)
-dump=backups/db/griha-$stamp.dump
-docker exec griha-postgres pg_dump -U griha -d griha -Fc > "$dump.tmp"
+dump=backups/db/home-inspection-$stamp.dump
+docker exec home-inspection-postgres pg_dump -U home-inspection -d home-inspection -Fc > "$dump.tmp"
 # A dump that pg_restore can't list is not a backup.
-docker exec -i griha-postgres pg_restore --list < "$dump.tmp" > /dev/null
+docker exec -i home-inspection-postgres pg_restore --list < "$dump.tmp" > /dev/null
 mv "$dump.tmp" "$dump"
-ls -1t backups/db/griha-*.dump | tail -n +$((KEEP_DUMPS + 1)) | xargs -r rm -f
+ls -1t backups/db/home-inspection-*.dump | tail -n +$((KEEP_DUMPS + 1)) | xargs -r rm -f
 
 offsite=skipped
 if [ -f rclone/rclone.conf ]; then
   rc() { docker run --rm -v "$PWD/rclone:/config/rclone" -v "$PWD/data/objects:/objects:ro" \
     -v "$PWD/backups/db:/db:ro" "$RCLONE_IMAGE" "$@"; }
-  rc copy /objects offsite:griha/objects --ignore-existing --exclude "tmp/**"
-  rc copy /db offsite:griha/db --ignore-existing
-  rc delete offsite:griha/db --min-age 90d
+  rc copy /objects offsite:home-inspection/objects --ignore-existing --exclude "tmp/**"
+  rc copy /db offsite:home-inspection/db --ignore-existing
+  rc delete offsite:home-inspection/db --min-age 90d
   offsite=ok
 fi
 

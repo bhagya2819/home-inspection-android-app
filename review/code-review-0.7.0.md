@@ -1,4 +1,4 @@
-# Code review: Griha 0.7.0 (`e251ab4..HEAD`, branch `claude/camera-preview-report-zoom-fbefa9`)
+# Code review: Home Inspection 0.7.0 (`e251ab4..HEAD`, branch `claude/camera-preview-report-zoom-fbefa9`)
 
 Review only; nothing modified. `./gradlew :app:assembleDebug :app:testDebugUnitTest` passes (Gradle stopped afterwards).
 Go tests were NOT run (not allowed on this Mac), so server findings come from reading the code.
@@ -149,7 +149,7 @@ Remaining issues:
 
 ## Checked and found fine
 - **Key sealing**: AES-256-GCM, random 12-byte nonce per seal, AAD constant, key length validated at startup (64 hex) and again per use; wrong
-  `GRIHA_SECRET_KEY` fails closed with a generic 500 (message not returned to phones). `INSERT ... ON CONFLICT (id)` single-row table.
+  `HOME_INSPECTION_SECRET_KEY` fails closed with a generic 500 (message not returned to phones). `INSERT ... ON CONFLICT (id)` single-row table.
 - **Key leakage**: never returned (only `last4`), not in logs (`logRequests` logs method/path/status only), error bodies are fixed strings, DeepSeek error
   bodies logged are DeepSeek's (≤500 chars), not the key. Admin endpoints use `s.admin(...)`; AI endpoints `s.auth(...)`.
 - **Key check**: `GET /models` before storing; 401/403 -> 400; transport/5xx -> 502; no write on failure.

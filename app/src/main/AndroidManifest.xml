@@ -19,14 +19,14 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".GrihaApp"
+        android:name=".HomeInspectionApp"
         android:allowBackup="false"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Griha">
+        android:theme="@style/Theme.HomeInspection">
 
         <activity
             android:name=".MainActivity"

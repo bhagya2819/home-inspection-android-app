@@ -1,4 +1,4 @@
-// Griha web dashboard. Talks to the same /v1 API as the phones, signed in with a cookie session.
+// Home Inspection web dashboard. Talks to the same /v1 API as the phones, signed in with a cookie session.
 // No framework: el() builds DOM nodes (text always via textContent, never innerHTML).
 "use strict";
 
@@ -45,7 +45,7 @@ function leaveText(l) { return KIND[l.kind] + (l.half ? " (" + HALF[l.half] + ")
 class ApiError extends Error { constructor(status, code, msg) { super(msg); this.status = status; this.code = code; } }
 
 async function api(method, path, body) {
-  const opts = { method, headers: { "X-Griha-Web": "1" }, credentials: "same-origin" };
+  const opts = { method, headers: { "X-Home-Inspection-Web": "1" }, credentials: "same-origin" };
   if (body !== undefined) { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
   const r = await fetch(path, opts);
   if (r.status === 204) return null;
@@ -64,7 +64,7 @@ async function api(method, path, body) {
 async function download(path, fallbackName, btn) {
   if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "Preparing…"; }
   try {
-    const r = await fetch(path, { credentials: "same-origin", headers: { "X-Griha-Web": "1" } });
+    const r = await fetch(path, { credentials: "same-origin", headers: { "X-Home-Inspection-Web": "1" } });
     if (!r.ok) {
       const e = (await r.json().catch(() => ({}))).error || {};
       if (r.status === 423) return showLocked(e.message);
@@ -157,7 +157,7 @@ function loginView() {
     catch (e) { msg.textContent = e.message; btn.disabled = false; }
   } }, el("label", { class: "f" }, "Employee code", code), el("label", { class: "f" }, "Password", pass), btn, msg);
   return el("div", { class: "card login" }, el("img", { class: "logo", src: "logo.jpg", alt: "" }),
-    el("h1", {}, "Griha dashboard"), el("p", { class: "muted" }, "Sign in with your employee code and app password."), form);
+    el("h1", {}, "Home Inspection dashboard"), el("p", { class: "muted" }, "Sign in with your employee code and app password."), form);
 }
 
 function passwordView() {
@@ -239,8 +239,8 @@ function reportRow(i) {
     };
     pick.addEventListener("change", sync);
     sync();
-    pdf.addEventListener("click", () => { const v = sync(); download("/v1/reports/" + v.id + "/pdf", "Griha-Report-" + i.report_number + "-v" + v.version + ".pdf", pdf); });
-    word.addEventListener("click", () => { const v = sync(); download("/v1/reports/" + v.id + "/docx", "Griha-Report-" + i.report_number + "-v" + v.version + ".docx", word); });
+    pdf.addEventListener("click", () => { const v = sync(); download("/v1/reports/" + v.id + "/pdf", "HomeInspection-Report-" + i.report_number + "-v" + v.version + ".pdf", pdf); });
+    word.addEventListener("click", () => { const v = sync(); download("/v1/reports/" + v.id + "/docx", "HomeInspection-Report-" + i.report_number + "-v" + v.version + ".docx", word); });
     actions = el("div", {}, el("div", { class: "row nowrap" }, i.versions.length > 1 ? pick : el("span", { class: "muted small" }, "Version " + r.version), pdf, word), why);
   }
   return el("tr", {},
@@ -344,7 +344,7 @@ async function attendanceView() {
 // The month as an Excel file: a Summary sheet (payroll) and a Day by day sheet (check-in/out times).
 function excelButton(month) {
   const b = el("button", { class: "btn small ghost", title: "Summary and day-by-day sheets for " + monthName(month),
-    onclick: () => download("/v1/admin/calendar/export?month=" + month, "Griha-Attendance-" + month + ".xlsx", b) }, "Download Excel");
+    onclick: () => download("/v1/admin/calendar/export?month=" + month, "HomeInspection-Attendance-" + month + ".xlsx", b) }, "Download Excel");
   return b;
 }
 
@@ -843,7 +843,7 @@ function exportRow(e) {
     try {
       // A short-lived link the browser downloads by itself (resumable, never held in page memory).
       const r = await api("POST", "/v1/admin/exports/" + e.id + "/link");
-      const a = el("a", { href: r.path, download: e.file_name || ("griha-export-" + e.id + ".zip") });
+      const a = el("a", { href: r.path, download: e.file_name || ("home-inspection-export-" + e.id + ".zip") });
       document.body.append(a); a.click(); a.remove();
     } catch (err) { toast(err.message); }
   } }, "Download zip");
@@ -886,7 +886,7 @@ async function verifyExportZip(f, exp, onProgress) {
   while (off + 30 <= f.size) {
     const h = new DataView(await f.slice(off, off + 30).arrayBuffer());
     if (h.getUint32(0, true) !== 0x04034b50) break; // central directory reached
-    if (h.getUint16(8, true) !== 0) return { ok: false, message: "This zip isn't a Griha export (compressed entries)." };
+    if (h.getUint16(8, true) !== 0) return { ok: false, message: "This zip isn't a Home Inspection export (compressed entries)." };
     const size = h.getUint32(18, true), nameLen = h.getUint16(26, true), extraLen = h.getUint16(28, true);
     const name = dec.decode(await f.slice(off + 30, off + 30 + nameLen).arrayBuffer());
     const start = off + 30 + nameLen + extraLen;

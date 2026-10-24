@@ -2,6 +2,6 @@
 <resources>
     <!-- Splash/window background before Compose draws; MainActivity then paints the chosen theme's
          background (ui/theme/Theme.kt). Light (cream) is the app's default. -->
-    <color name="griha_window">#F8F6EA</color>
-    <color name="griha_cream">#F8F6EA</color>
+    <color name="home_inspection_window">#F8F6EA</color>
+    <color name="home_inspection_cream">#F8F6EA</color>
 </resources>

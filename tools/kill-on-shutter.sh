@@ -7,7 +7,7 @@ A=${ADB:-~/Library/Android/sdk/platform-tools/adb}
 for d in ${@:-0.15 0.6 1.5}; do
   $A logcat -c
   until $A logcat -d -s ImageCapture:D | grep -q takePictureInternal; do sleep 0.05; done
-  sleep $d; $A shell am force-stop com.griha.inspection
+  sleep $d; $A shell am force-stop com.homeinspection.app
   echo "$(date +%T) killed app ${d}s after shutter"
 done
 echo "all kills done"

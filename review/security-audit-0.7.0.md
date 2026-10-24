@@ -1,8 +1,8 @@
-# Security audit: Griha app 0.7.0 + server (read-only review)
+# Security audit: Home Inspection app 0.7.0 + server (read-only review)
 
 Scope: Android manifest/storage/session code, Go API (auth, sync, files, exports, admin, AI), deploy files.
 Method: code reading only. Nothing was run, no server or phone touched, no secrets read (release keystore never opened).
-Threat model assumed: internet attacker against `api.grihahomeinspection.in`; a lost/stolen inspector phone; a malicious or careless
+Threat model assumed: internet attacker against `api.homeinspection.example`; a lost/stolen inspector phone; a malicious or careless
 inspector with valid credentials; a leaked database/backup.
 
 **Overall: sound for a small pilot. No critical or remotely exploitable hole found.** The fundamentals are right
@@ -53,12 +53,12 @@ from the server DB and removed from text), and a check against India's DPDP Act 
 for that month. The token is 256-bit random and stored only as SHA-256 (good), the app log path is redacted, and a new link replaces the old one,
 but the URL may land in Caddy access logs, browser history or shared chats. 48 h is long. Fix: shorten to 15-30 min, make it single-use
 (clear `download_token_hash` on first completed GET, allowing Range resume within a short window), keep Caddy access logging of that path off.
-The downloaded zip then sits in the phone's Downloads/Griha (visible to other apps with storage access and to the user): unavoidable with DownloadManager; note for the admin.
+The downloaded zip then sits in the phone's Downloads/Home Inspection (visible to other apps with storage access and to the user): unavoidable with DownloadManager; note for the admin.
 
 ### S8. LOW: `X-Real-IP` trusted; API reachable from other containers
-The limiter keys on `X-Real-IP`, safe only because Caddy is the sole ingress. `griha-api` is also attached to the shared `bondverse_default` network,
-so any other container on that network can call `griha-api:8080` directly with a forged header (resets per-IP limits) or skip TLS/body limits.
-Postgres is correctly only on the private network and no ports are published. Fix: a dedicated network between Caddy and griha-api,
+The limiter keys on `X-Real-IP`, safe only because Caddy is the sole ingress. `home-inspection-api` is also attached to the shared `bondverse_default` network,
+so any other container on that network can call `home-inspection-api:8080` directly with a forged header (resets per-IP limits) or skip TLS/body limits.
+Postgres is correctly only on the private network and no ports are published. Fix: a dedicated network between Caddy and home-inspection-api,
 or accept that other containers on that box are trusted.
 
 ### S9. LOW: whole-company data model (by design)
@@ -72,7 +72,7 @@ are Keystore-encrypted (good). Backups are disabled (`allowBackup=false`, extrac
 mitigate with device lock policy. The offline verifier uses 210k PBKDF2 rounds (below the server's 600k, an acceptable trade).
 
 ### S11. LOW: operational secrets
-`GRIHA_SECRET_KEY` and `POSTGRES_PASSWORD` sit together in `/root/apps/griha/.env` on the same host as the DB, so the AES-GCM sealing protects the DeepSeek key only against a
+`HOME_INSPECTION_SECRET_KEY` and `POSTGRES_PASSWORD` sit together in `/root/apps/home-inspection/.env` on the same host as the DB, so the AES-GCM sealing protects the DeepSeek key only against a
 database/backup-only leak, not a host compromise. That is the intended design; make sure DB backups never include `.env`.
 The audit log stores the last 4 characters of the DeepSeek key (fine). The release keystore and password are correctly outside the repo and `.gitignore`d (`*.jks`).
 

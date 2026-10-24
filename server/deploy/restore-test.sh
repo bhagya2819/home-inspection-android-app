@@ -1,20 +1,20 @@
 #!/bin/sh
 # Restores the newest DB dump into a throwaway Postgres (tmpfs, no network) and checks every verified photo/report
 # object against the restored SHA-256. Touches no live data.
-# Usage (in /root/apps/griha): sh restore-test.sh [objects_dir]   (default data/objects; pass an off-site copy to test it)
+# Usage (in /root/apps/home-inspection): sh restore-test.sh [objects_dir]   (default data/objects; pass an off-site copy to test it)
 set -eu
 cd "$(dirname "$0")"
 OBJECTS=${1:-data/objects}
-dump=$(ls -1t backups/db/griha-*.dump | head -1)
-NAME=griha-restore-test-$$
+dump=$(ls -1t backups/db/home-inspection-*.dump | head -1)
+NAME=home-inspection-restore-test-$$
 cleanup() { docker rm -f "$NAME" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
 docker run -d --name "$NAME" --network none --tmpfs /var/lib/postgresql/data -e POSTGRES_PASSWORD=test postgres:17-alpine >/dev/null
 until docker exec "$NAME" pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
-docker exec "$NAME" createdb -U postgres griha
-docker exec -i "$NAME" pg_restore -U postgres -d griha --no-owner --exit-on-error < "$dump"
-q() { docker exec "$NAME" psql -U postgres -d griha -Atc "$1"; }
+docker exec "$NAME" createdb -U postgres home-inspection
+docker exec -i "$NAME" pg_restore -U postgres -d home-inspection --no-owner --exit-on-error < "$dump"
+q() { docker exec "$NAME" psql -U postgres -d home-inspection -Atc "$1"; }
 
 echo "dump: $dump"
 q "select 'inspections', count(*) from inspections union all select 'photos', count(*) from photos

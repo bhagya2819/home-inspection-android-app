@@ -8,31 +8,31 @@ plugins {
 }
 
 // Release signing (PRD §14). The keystore and its passwords never enter the repo: they are read from
-// a properties file the owner keeps, ~/.griha/release-signing.properties (or -Pgriha.signing=<path>):
-//   storeFile=/absolute/path/griha-release.jks
+// a properties file the owner keeps, ~/.home-inspection/release-signing.properties (or -Phome-inspection.signing=<path>):
+//   storeFile=/absolute/path/home-inspection-release.jks
 //   storePassword=…
-//   keyAlias=griha
+//   keyAlias=home-inspection
 //   keyPassword=…
 // Without it, release builds are debug-signed for local testing only — never distribute those:
 // a phone that installed one can't update to a properly signed build without losing its data.
 val releaseSigning = Properties().apply {
-    val path = providers.gradleProperty("griha.signing").orNull ?: "${System.getProperty("user.home")}/.griha/release-signing.properties"
+    val path = providers.gradleProperty("home-inspection.signing").orNull ?: "${System.getProperty("user.home")}/.home-inspection/release-signing.properties"
     file(path).takeIf { it.isFile }?.inputStream()?.use { load(it) }
 }
 
 android {
-    namespace = "com.griha.inspection"
+    namespace = "com.homeinspection.app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.griha.inspection"
+        applicationId = "com.homeinspection.app"
         minSdk = 26
         targetSdk = 37
         // Bump versionCode for every APK handed out; Android only installs updates with a higher one.
         versionCode = 11
         versionName = "0.9.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"https://api.grihahomeinspection.in\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://api.homeinspection.example\"")
         // OpenCV (face check-in) is native code: ship only the ARM builds real phones use (no emulator in use).
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
@@ -50,7 +50,7 @@ android {
 
     buildTypes {
         debug {
-            // Installs next to the release app ("Griha (debug)", own data), so testing never touches real work.
+            // Installs next to the release app ("Home Inspection (debug)", own data), so testing never touches real work.
             applicationIdSuffix = ".debug"
         }
         release {
@@ -61,7 +61,7 @@ android {
                 "proguard-rules.pro",
             )
             signingConfig = if (releaseSigning.isEmpty) {
-                logger.warn("Griha: no release signing properties found; release APK is DEBUG-signed (local testing only).")
+                logger.warn("Home Inspection: no release signing properties found; release APK is DEBUG-signed (local testing only).")
                 signingConfigs.getByName("debug")
             } else {
                 signingConfigs.getByName("release")

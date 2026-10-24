@@ -1,4 +1,4 @@
--- Griha central hub schema (PRD §6.3, §7). Clients (Android today, iOS later) create entity ids,
+-- Home Inspection central hub schema (PRD §6.3, §7). Clients (Android today, iOS later) create entity ids,
 -- so ids are client UUIDs. Client timestamps are UTC epoch millis, exactly as the device stored them.
 -- Every syncable row carries:
 --   revision          bumped by the server on each accepted write; clients send it back as base_revision
