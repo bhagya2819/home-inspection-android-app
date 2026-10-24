@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- Admin map (live location). Leaflet 1.9.4 (BSD-2, LEAFLET-LICENSE.txt) + OpenStreetMap tiles.
+     The app inlines leaflet.css/js into this page at runtime; it only ever talks to the tile server. -->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<style>/*LEAFLET_CSS*/</style>
+<style>
+  html, body, #map { margin: 0; height: 100%; background: #e8ece6; }
+  .pin { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff;
+         font: 600 12px system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+  .stop { display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #26552A;
+          color: #fff; font: 600 11px system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+  .leaflet-popup-content { font: 13px system-ui, sans-serif; margin: 8px 12px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>/*LEAFLET_JS*/</script>
+<script>
+  var map = L.map('map', { zoomControl: true, attributionControl: true }).setView([17.385, 78.4867], 11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  map.attributionControl.setPrefix('Leaflet');
+  var layer = L.layerGroup().addTo(map);
+  var fitted = false;
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
+
+  function pin(p, size) {
+    return L.marker([p.lat, p.lng], { icon: L.divIcon({ className: '', iconSize: [size, size],
+      html: '<div class="pin" style="width:' + (size - 4) + 'px;height:' + (size - 4) + 'px;background:' + p.color + '">' + esc(p.initials) + '</div>' }) });
+  }
+
+  function fit(latlngs, keep) {
+    if (!latlngs.length || (keep && fitted)) return;
+    fitted = true;
+    if (latlngs.length === 1) map.setView(latlngs[0], 16); else map.fitBounds(L.latLngBounds(latlngs), { padding: [36, 36], maxZoom: 17 });
+  }
+
+  // Team: one pin per engineer with a known position, in their status colour. keep = don't re-zoom on refresh.
+  window.showTeam = function (people, keep) {
+    layer.clearLayers();
+    var all = [];
+    people.forEach(function (p) {
+      if (p.acc && p.acc > 30) L.circle([p.lat, p.lng], { radius: p.acc, color: p.color, weight: 1, fillOpacity: 0.08 }).addTo(layer);
+      pin(p, 34).on('click', function () { Android.onPerson(p.id); })
+        .bindTooltip(esc(p.name), { direction: 'top', offset: [0, -16] }).addTo(layer);
+      all.push([p.lat, p.lng]);
+    });
+    fit(all, keep);
+  };
+
+  // One engineer's day: route, numbered stops, check-in/out, latest position.
+  window.showDay = function (d, keep) {
+    layer.clearLayers();
+    var all = d.route.slice();
+    if (d.route.length > 1) L.polyline(d.route, { color: '#1B392B', weight: 4, opacity: 0.75 }).addTo(layer);
+    d.checks.forEach(function (c) {
+      L.circleMarker([c.lat, c.lng], { radius: 7, color: '#fff', weight: 2, fillColor: c.color, fillOpacity: 1 })
+        .bindPopup(esc(c.label)).addTo(layer);
+      all.push([c.lat, c.lng]);
+    });
+    d.stops.forEach(function (s, i) {
+      L.marker([s.lat, s.lng], { icon: L.divIcon({ className: '', iconSize: [24, 24],
+        html: '<div class="stop" style="width:20px;height:20px">' + (i + 1) + '</div>' }) })
+        .bindPopup(esc(s.label)).addTo(layer);
+    });
+    if (d.last) { pin(d.last, 34).addTo(layer); all.push([d.last.lat, d.last.lng]); }
+    fit(all, keep);
+  };
+
+  window.focusOn = function (lat, lng) { map.setView([lat, lng], 17); };
+  Android.onReady();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.gradle/
+.kotlin/
+build/
+/app/build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+/captures
+*.keystore
+*.jks
+/dist/
+# Test-account passwords for the debug app
+test-credentials.properties

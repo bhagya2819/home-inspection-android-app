@@ -1,0 +1,45 @@
+# Griha API on the shared Hetzner box. Lives in /root/apps/griha; touches nothing else.
+# Caddy (bondverse project) reaches griha-api over the external bondverse_default network.
+name: griha
+services:
+  griha-api:
+    build: ./src
+    image: griha-api:latest
+    container_name: griha-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://griha:${POSTGRES_PASSWORD}@griha-postgres:5432/griha?sslmode=disable
+      DATA_DIR: /data
+      GRIHA_SECRET_KEY: ${GRIHA_SECRET_KEY:-}
+    volumes:
+      - ./data/objects:/data
+    networks: [default, bondverse_default]
+    depends_on:
+      griha-postgres:
+        condition: service_healthy
+    mem_limit: 256m
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  griha-postgres:
+    image: postgres:17-alpine
+    container_name: griha-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: griha
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: griha
+    # Sized for a 4 GB box shared with other apps.
+    command: postgres -c shared_buffers=64MB -c max_connections=30 -c effective_cache_size=256MB
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U griha -d griha"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 384m
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+networks:
+  bondverse_default:
+    external: true

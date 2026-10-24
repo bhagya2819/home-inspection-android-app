@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Only the window/splash background; all real theming is in Compose (ui/theme/Theme.kt).
+         MainActivity repaints the window in the chosen theme (Profile › Appearance) right away. -->
+    <style name="Theme.Griha" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/griha_window</item>
+    </style>
+</resources>

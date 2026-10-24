@@ -1,0 +1,4 @@
+# Griha weekly backup (Sunday 02:30 IST = Saturday 21:00 UTC). Owner: /root/apps/griha
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+0 21 * * 6 root sh /root/apps/griha/backup.sh >> /root/apps/griha/backups/backup.log 2>&1
